@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { VizType, WidgetConfig, SemanticModel } from '../types';
+import { VizType, WidgetConfig, SemanticModel, AnalysisResult } from '../types';
 
 // Fallback heuristic logic for when API key is missing or offline
 const heuristicParse = (prompt: string): WidgetConfig => {
@@ -48,14 +48,11 @@ export const parsePrompt = async (prompt: string, semanticModel?: SemanticModel)
   }
 
   try {
-    // 2. Initialize Gemini Client
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
-    // 3. Construct Context
     const availableMetrics = semanticModel?.metrics.map(m => m.name).join(', ') || 'Sales, Users, Conversion';
     const availableDimensions = semanticModel?.dimensions.map(d => d.name).join(', ') || 'Date, Region, Category';
     
-    // 4. Call Gemini
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `
@@ -97,11 +94,9 @@ export const parsePrompt = async (prompt: string, semanticModel?: SemanticModel)
       }
     });
 
-    // 5. Parse and Return
     const text = response.text;
     if (text) {
       const config = JSON.parse(text) as WidgetConfig;
-      // Ensure ID is unique if the model returned a static one
       config.id = config.id || `gen-${Date.now()}`;
       return config;
     }
@@ -111,5 +106,64 @@ export const parsePrompt = async (prompt: string, semanticModel?: SemanticModel)
   } catch (error) {
     console.error("[OmniGen] AI Generation failed, falling back to heuristics:", error);
     return heuristicParse(prompt);
+  }
+};
+
+export const generateAnalysis = async (title: string, data: any[]): Promise<AnalysisResult> => {
+  // Fallback for demo/offline
+  if (!process.env.API_KEY) {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve({
+        summary: `Analysis of ${title} indicates a stable trend with minor fluctuations. The data suggests consistent performance across the selected timeframe.`,
+        drivers: ["Consistent user engagement", "Seasonal baseline effects"],
+        recommendations: ["Monitor for upcoming seasonal spikes", "Investigate lower performing segments"],
+        sentiment: "neutral"
+      }), 1500);
+    });
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    // Limit data size for context window if necessary (taking top 50 rows or aggregating)
+    const dataSample = JSON.stringify(data.slice(0, 50));
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `
+        Role: Senior Business Analyst.
+        Task: Analyze the following dataset for a chart titled "${title}".
+        Data (Sample): ${dataSample}
+        
+        Provide:
+        1. An executive summary (max 2 sentences).
+        2. Key drivers/factors (max 3 bullet points).
+        3. Strategic recommendations (max 2).
+        4. Overall sentiment.
+      `,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            summary: { type: Type.STRING },
+            drivers: { type: Type.ARRAY, items: { type: Type.STRING } },
+            recommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
+            sentiment: { type: Type.STRING, enum: ["positive", "negative", "neutral"] }
+          }
+        }
+      }
+    });
+
+    return JSON.parse(response.text!) as AnalysisResult;
+
+  } catch (error) {
+    console.error("Analysis failed", error);
+    return {
+       summary: "Could not generate analysis at this time.",
+       drivers: [],
+       recommendations: [],
+       sentiment: "neutral"
+    };
   }
 };

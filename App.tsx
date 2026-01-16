@@ -1,12 +1,14 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Icons } from './constants';
-import { EditMode, WidgetConfig } from './types';
+import { EditMode, WidgetConfig, AnalysisResult } from './types';
 import { inferSemanticModel } from './services/semanticEngine';
 import { generateTemplates } from './services/templateService';
+import { generateAnalysis } from './services/aiService';
 import { WidgetContainer } from './components/WidgetContainer';
 import { Sidebar } from './components/Sidebar';
 import { MagicBar } from './components/MagicBar';
+import { AnalysisPanel } from './components/AnalysisPanel';
 import { useDataManager } from './hooks/useDataManager';
 
 // --- Main Application ---
@@ -14,11 +16,17 @@ import { useDataManager } from './hooks/useDataManager';
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'catalog' | 'model' | 'trust'>('dashboard');
   const [mode, setMode] = useState<EditMode>(EditMode.SAFE);
-  const [selectedTemplateId, setSelectedTemplateId] = useState('exec-0');
+  const [selectedTemplateId, setSelectedTemplateId] = useState('foh-sales-exec');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   // Mutable state for widgets to allow AI additions
   const [dashboardWidgets, setDashboardWidgets] = useState<WidgetConfig[]>([]);
+
+  // Analysis Panel State
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const [analyzingWidget, setAnalyzingWidget] = useState<WidgetConfig | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Generate Templates (Memoized)
   const templates = useMemo(() => generateTemplates(), []);
@@ -46,7 +54,19 @@ const App: React.FC = () => {
 
   const handleWidgetGenerated = (newWidget: WidgetConfig) => {
     setDashboardWidgets(prev => [...prev, newWidget]);
-    // Optionally scroll to bottom or highlight new widget
+  };
+
+  const handleAnalyze = async (widget: WidgetConfig, currentData: any[]) => {
+    setAnalyzingWidget(widget);
+    setIsAnalysisOpen(true);
+    setAnalysisResult(null);
+    setIsAnalyzing(true);
+
+    // Call AI Service
+    const result = await generateAnalysis(widget.title, currentData);
+    
+    setAnalysisResult(result);
+    setIsAnalyzing(false);
   };
 
   return (
@@ -107,7 +127,13 @@ const App: React.FC = () => {
             <>
               <div className="grid grid-cols-12 gap-8 max-w-screen-2xl mx-auto pb-32">
                 {dashboardWidgets.map(w => (
-                  <WidgetContainer key={w.id} widget={w} mode={mode} data={data} />
+                  <WidgetContainer 
+                    key={w.id} 
+                    widget={w} 
+                    mode={mode} 
+                    data={data} 
+                    onAnalyze={handleAnalyze}
+                  />
                 ))}
               </div>
               <MagicBar onWidgetGenerated={handleWidgetGenerated} semanticModel={semanticModel} />
@@ -118,7 +144,7 @@ const App: React.FC = () => {
             <div className="max-w-screen-xl mx-auto space-y-8 pb-20">
               <h3 className="text-4xl font-black uppercase tracking-tighter">Blueprint Catalog</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {templates.slice(0, 15).map(t => (
+                {templates.map(t => (
                   <div key={t.id} onClick={() => { setSelectedTemplateId(t.id); setActiveTab('dashboard'); }} className="bg-white border-2 border-slate-100 p-8 rounded-[2.5rem] hover:shadow-2xl transition-all cursor-pointer group hover:-translate-y-1">
                     <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{t.category}</span>
                     <h4 className="text-2xl font-black mt-2 leading-tight group-hover:text-indigo-600 transition-colors">{t.name}</h4>
@@ -186,6 +212,15 @@ const App: React.FC = () => {
             </div>
           )}
         </div>
+        
+        {/* Analysis Panel Overlay */}
+        <AnalysisPanel 
+          isOpen={isAnalysisOpen} 
+          onClose={() => setIsAnalysisOpen(false)} 
+          widget={analyzingWidget}
+          analysis={analysisResult}
+          isLoading={isAnalyzing}
+        />
       </main>
     </div>
   );

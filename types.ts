@@ -60,3 +60,10 @@ export interface DashboardTemplate {
   widgets: WidgetConfig[];
   difficulty: 'Novice' | 'Intermediate' | 'Pro';
 }
+
+export interface AnalysisResult {
+  summary: string;
+  drivers: string[];
+  recommendations: string[];
+  sentiment: 'positive' | 'negative' | 'neutral';
+}

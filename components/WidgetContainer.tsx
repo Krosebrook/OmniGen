@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { WidgetConfig, EditMode, VizType } from '../types';
 import { ChartRenderer } from './ChartRenderer';
+import { Icons } from '../constants';
 
 const DRILL_HIERARCHY = ['region', 'category', 'date'];
 
@@ -36,9 +37,10 @@ interface WidgetContainerProps {
   widget: WidgetConfig;
   mode: EditMode;
   data: any[];
+  onAnalyze: (widget: WidgetConfig, currentData: any[]) => void;
 }
 
-export const WidgetContainer: React.FC<WidgetContainerProps> = ({ widget, mode, data }) => {
+export const WidgetContainer: React.FC<WidgetContainerProps> = ({ widget, mode, data, onAnalyze }) => {
   const [drillPath, setDrillPath] = useState<string[]>([]);
   const currentLevelIndex = Math.min(drillPath.length, DRILL_HIERARCHY.length - 1);
   const currentLevel = DRILL_HIERARCHY[currentLevelIndex];
@@ -70,7 +72,7 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({ widget, mode, 
 
   return (
     <div 
-      className="bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col transition-all hover:shadow-lg hover:border-indigo-200 relative"
+      className="bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col transition-all hover:shadow-lg hover:border-indigo-200 relative group/widget"
       style={{ gridColumn: `span ${widget.w}`, gridRow: `span ${widget.h}` }}
     >
       {widget.type !== VizType.KPI_CARD && (
@@ -80,6 +82,12 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({ widget, mode, 
             <Breadcrumbs path={drillPath} onNavigate={handleNavigate} />
           </div>
           <div className="flex items-center gap-2">
+            <button
+               onClick={() => onAnalyze(widget, filteredData)}
+               className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wider hover:text-indigo-600 hover:border-indigo-200 transition-colors shadow-sm"
+            >
+              <Icons.Sparkles /> Analyze
+            </button>
             {drillPath.length > 0 && (
               <button 
                 onClick={handleLevelUp}
@@ -91,12 +99,18 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({ widget, mode, 
                 </svg>
               </button>
             )}
-            {mode === EditMode.PRO && (
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" title="Editable" />
-            )}
           </div>
         </div>
       )}
+      
+      {widget.type === VizType.KPI_CARD && (
+         <div className="absolute top-4 right-4 opacity-0 group-hover/widget:opacity-100 transition-opacity">
+            <button onClick={() => onAnalyze(widget, filteredData)} className="p-2 bg-indigo-50 text-indigo-600 rounded-full shadow-sm hover:scale-110 transition-transform">
+               <Icons.Sparkles />
+            </button>
+         </div>
+      )}
+
       <div className="flex-1 p-6 relative">
         <ChartRenderer 
           config={widget} 
