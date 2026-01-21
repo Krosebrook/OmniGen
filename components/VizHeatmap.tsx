@@ -10,17 +10,16 @@ interface VizHeatmapProps {
 }
 
 export const VizHeatmap: React.FC<VizHeatmapProps> = ({ data, xKey, yKey, valKey }) => {
-  // Normalize value for opacity/color
-  const maxVal = Math.max(...data.map(d => d[valKey] || 0));
+  const maxVal = Math.max(...data.map(d => d[valKey] || 0), 1);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ScatterChart margin={{ top: 20, right: 0, bottom: 20, left: 0 }}>
+      <ScatterChart margin={{ top: 20, right: 10, bottom: 20, left: 10 }}>
         <XAxis 
             dataKey={xKey} 
             type="category" 
             name={xKey} 
-            tick={{ fontSize: 10, fill: '#94a3b8' }} 
+            tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} 
             tickLine={false}
             axisLine={false}
             interval={0}
@@ -29,20 +28,30 @@ export const VizHeatmap: React.FC<VizHeatmapProps> = ({ data, xKey, yKey, valKey
             dataKey={yKey} 
             type="category" 
             name={yKey} 
-            tick={{ fontSize: 10, fill: '#94a3b8' }} 
+            tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} 
             tickLine={false}
             axisLine={false}
         />
-        <ZAxis type="number" dataKey={valKey} range={[0, 500]} />
+        <ZAxis type="number" dataKey={valKey} range={[400, 400]} />
         <Tooltip 
-            cursor={{ strokeDasharray: '3 3' }} 
-            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '12px' }}
-            itemStyle={{ color: '#f8fafc' }}
+            cursor={{ strokeDasharray: '3 3', stroke: '#334155' }} 
+            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}
+            itemStyle={{ color: '#f8fafc', fontSize: '12px' }}
         />
         <Scatter data={data} shape="square">
           {data.map((entry, index) => {
-            const opacity = 0.3 + (0.7 * (entry[valKey] / maxVal));
-            return <Cell key={`cell-${index}`} fill={`rgba(236, 72, 153, ${opacity})`} stroke="#db2777" strokeWidth={1} />;
+            const ratio = entry[valKey] / maxVal;
+            const opacity = 0.2 + (0.8 * ratio);
+            // Dynamic color based on value intensity
+            return (
+              <Cell 
+                key={`cell-${index}`} 
+                fill={`rgba(168, 85, 247, ${opacity})`} 
+                stroke="#a855f7" 
+                strokeWidth={1} 
+                strokeOpacity={0.4}
+              />
+            );
           })}
         </Scatter>
       </ScatterChart>

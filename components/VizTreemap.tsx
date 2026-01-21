@@ -7,7 +7,10 @@ interface VizTreemapProps {
 }
 
 const CustomizedContent = (props: any) => {
-  const { root, depth, x, y, width, height, index, payload, colors, name } = props;
+  const { x, y, width, height, index, colors, name, size } = props;
+
+  // Don't render tiny rectangles' text to keep it clean
+  const showText = width > 50 && height > 30;
 
   return (
     <g>
@@ -17,24 +20,37 @@ const CustomizedContent = (props: any) => {
         width={width}
         height={height}
         style={{
-          fill: depth < 2 ? colors[index % colors.length] : 'none',
-          stroke: '#fff',
-          strokeWidth: 2 / (depth + 1e-10),
-          strokeOpacity: 1 / (depth + 1e-10),
+          fill: colors[index % colors.length],
+          stroke: '#1e293b',
+          strokeWidth: 2,
+          transition: 'all 0.3s ease'
         }}
+        className="hover:brightness-110 cursor-default"
       />
-      {depth === 1 ? (
-        <text
-          x={x + width / 2}
-          y={y + height / 2 + 7}
-          textAnchor="middle"
-          fill="#fff"
-          fontSize={10}
-          fontWeight="bold"
-        >
-          {name}
-        </text>
-      ) : null}
+      {showText && (
+        <>
+          <text
+            x={x + 8}
+            y={y + 18}
+            fill="#fff"
+            fontSize={11}
+            fontWeight="900"
+            className="uppercase tracking-tighter pointer-events-none opacity-80"
+          >
+            {name}
+          </text>
+          <text
+            x={x + 8}
+            y={y + 32}
+            fill="#fff"
+            fontSize={10}
+            fontWeight="bold"
+            className="pointer-events-none opacity-60"
+          >
+             {new Intl.NumberFormat('en-US', { notation: 'compact' }).format(size)}
+          </text>
+        </>
+      )}
     </g>
   );
 };
@@ -50,7 +66,10 @@ export const VizTreemap: React.FC<VizTreemapProps> = ({ data }) => {
         fill="#8884d8"
         content={<CustomizedContent colors={['#8b5cf6', '#ec4899', '#a855f7', '#d946ef', '#6366f1', '#06b6d4']} />}
       >
-        <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '12px' }} />
+        <Tooltip 
+          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}
+          itemStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
+        />
       </Treemap>
     </ResponsiveContainer>
   );

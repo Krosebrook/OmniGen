@@ -8,6 +8,7 @@ interface SidebarProps {
   isSidebarOpen: boolean;
   onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
+  toggleSidebar: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -15,65 +16,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab, 
   isSidebarOpen, 
   onImport, 
-  onExport 
+  onExport,
+  toggleSidebar
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const NavItem = ({ id, icon: Icon, label }: { id: any, icon: any, label: string }) => (
     <button 
       onClick={() => setActiveTab(id)} 
-      className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all border ${activeTab === id ? 'bg-fuchsia-600/20 border-fuchsia-500/30 text-white shadow-[0_0_15px_rgba(192,38,211,0.2)]' : 'border-transparent text-slate-500 hover:bg-white/5 hover:text-slate-300'}`}
+      className={`w-full flex items-center justify-center lg:justify-start gap-4 p-3 rounded-2xl text-sm font-bold transition-all border ${activeTab === id ? 'bg-fuchsia-600 text-white border-fuchsia-500 shadow-lg shadow-fuchsia-500/20' : 'border-transparent text-slate-600 hover:bg-white/5 hover:text-slate-300'}`}
+      title={label}
     >
-      <Icon /> {isSidebarOpen && <span>{label}</span>}
+      <Icon /> 
+      {isSidebarOpen && <span className="hidden lg:block uppercase tracking-widest text-[10px] font-black">{label}</span>}
     </button>
   );
 
   return (
-    <aside className={`glass-panel border-r border-white/10 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'w-72' : 'w-24'}`}>
-      <div className="p-8 flex items-center gap-4">
-        {/* Stylized 'F' Logo */}
-        <div className="relative w-10 h-10 flex-shrink-0">
-            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 80C20 80 35 70 35 50C35 30 60 10 85 10" stroke="url(#paint0_linear)" strokeWidth="12" strokeLinecap="round"/>
-                <path d="M35 50H70" stroke="url(#paint1_linear)" strokeWidth="12" strokeLinecap="round"/>
-                <defs>
-                    <linearGradient id="paint0_linear" x1="20" y1="80" x2="85" y2="10" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#8B5CF6"/>
-                        <stop offset="1" stopColor="#EC4899"/>
-                    </linearGradient>
-                    <linearGradient id="paint1_linear" x1="35" y1="50" x2="70" y2="50" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#EC4899"/>
-                        <stop offset="1" stopColor="#F472B6"/>
-                    </linearGradient>
-                </defs>
+    <aside className={`glass-panel border-r border-white/5 flex flex-col transition-all duration-500 z-50 ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
+      <div className="h-16 flex items-center justify-center lg:px-6 mb-8 border-b border-white/5">
+        <button onClick={toggleSidebar} className="p-2 hover:bg-white/10 rounded-xl text-fuchsia-500 transition-all">
+            <svg className="w-6 h-6" viewBox="0 0 100 100" fill="none">
+                <path d="M20 80C20 80 35 70 35 50C35 30 60 10 85 10" stroke="currentColor" strokeWidth="12" strokeLinecap="round"/>
+                <path d="M35 50H70" stroke="currentColor" strokeWidth="12" strokeLinecap="round"/>
             </svg>
-             <div className="absolute inset-0 bg-fuchsia-500/20 blur-lg rounded-full"></div>
-        </div>
-        {isSidebarOpen && <span className="font-black text-2xl tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">OmniGen</span>}
+        </button>
       </div>
       
-      <nav className="flex-1 px-4 space-y-2">
-        <NavItem id="dashboard" icon={Icons.Dashboard} label="My Dashboard" />
-        <NavItem id="catalog" icon={Icons.Templates} label="Templates" />
-        <NavItem id="model" icon={Icons.Model} label="Semantic Model" />
-        <NavItem id="trust" icon={Icons.Shield} label="Security Lab" />
+      <nav className="flex-1 px-3 space-y-3">
+        <NavItem id="dashboard" icon={Icons.Dashboard} label="Home" />
+        <NavItem id="catalog" icon={Icons.Templates} label="Blueprints" />
+        <NavItem id="model" icon={Icons.Model} label="Logic" />
+        <NavItem id="trust" icon={Icons.Shield} label="Security" />
       </nav>
 
-      <div className="p-6 border-t border-white/5 space-y-2">
+      <div className="p-3 border-t border-white/5 space-y-3 mb-4">
         <input type="file" ref={fileInputRef} onChange={onImport} className="hidden" accept=".csv,.json" />
         
         <button 
           onClick={() => fileInputRef.current?.click()} 
-          className="w-full bg-slate-100 text-slate-900 rounded-2xl py-3.5 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[0.98] transition-transform shadow-lg shadow-white/5"
+          className="w-full flex items-center justify-center p-3 rounded-2xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+          title="Import Data"
         >
-          <Icons.Upload /> {isSidebarOpen && "Import Data"}
+          <Icons.Upload />
         </button>
         
         <button 
           onClick={onExport} 
-          className="w-full border border-white/10 text-slate-400 rounded-2xl py-3 text-xs font-black uppercase tracking-widest hover:bg-white/5 hover:text-white transition-colors"
+          className="w-full flex items-center justify-center p-3 rounded-2xl border border-white/5 text-slate-600 hover:text-white transition-all"
+          title="Export HTML"
         >
-           {isSidebarOpen ? "Export HTML" : "HTML"}
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
         </button>
       </div>
     </aside>

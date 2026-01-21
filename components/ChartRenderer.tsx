@@ -25,55 +25,52 @@ interface ChartRendererProps {
 export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDrill, currentLevel, drillPath, canDrill }) => {
   
   // -- Standard Aggregation (Bar, Line, KPI) --
-  // Aggregates data by the current drill level (Dimension) and sums the metric.
   const standardData = useMemo(() => {
     if ([VizType.SCATTER, VizType.HEATMAP, VizType.TREEMAP].includes(config.type)) return [];
     
     const metric = config.metric || 'sales';
+    const dim = config.dimension || currentLevel;
     const agg: Record<string, any> = {};
     
     data.forEach(item => {
-      const key = String(item[currentLevel] || 'Unknown');
+      const key = String(item[dim] || 'Unknown');
       
-      // Initialize the group if it doesn't exist
       if (!agg[key]) {
-        agg[key] = { [currentLevel]: key };
+        agg[key] = { [dim]: key };
         agg[key][metric] = 0;
         
-        // Backward compatibility: ensure standard keys exist for legacy templates
-        if (metric !== 'sales') agg[key]['sales'] = 0;
-        if (metric !== 'users') agg[key]['users'] = 0;
+        if (metric !== 'sales' && 'sales' in item) agg[key]['sales'] = 0;
+        if (metric !== 'users' && 'users' in item) agg[key]['users'] = 0;
       }
       
-      // Safely accumulate the metric
       const val = Number(item[metric]);
       if (!isNaN(val)) {
         agg[key][metric] += val;
       }
       
-      // Accumulate defaults if present in source data (legacy support)
       if (metric !== 'sales' && item.sales) agg[key]['sales'] += Number(item.sales) || 0;
       if (metric !== 'users' && item.users) agg[key]['users'] += Number(item.users) || 0;
     });
     
-    // Sort by dimension key for consistent display
-    return Object.values(agg).sort((a, b) => String(a[currentLevel]).localeCompare(String(b[currentLevel])));
-  }, [data, currentLevel, config.type, config.metric]);
+    return Object.values(agg).sort((a, b) => String(a[dim]).localeCompare(String(b[dim])));
+  }, [data, currentLevel, config.type, config.metric, config.dimension]);
 
-  // -- Scatter Data (Raw) --
-  // Maps data directly for X/Y/Z plotting without aggregation
+  // -- Scatter Data --
   const scatterData = useMemo(() => {
     if (config.type !== VizType.SCATTER) return [];
+    const xKey = config.dimension || 'sales';
+    const yKey = config.secondaryDimension || 'users';
+    const zKey = config.metric || 'conversion';
+    
     return data.map(d => ({
         ...d,
-        [config.dimension || 'sales']: Number(d[config.dimension || 'sales'] || 0),
-        [config.secondaryDimension || 'users']: Number(d[config.secondaryDimension || 'users'] || 0),
-        [config.metric || 'conversion']: Number(d[config.metric || 'conversion'] || 0),
+        [xKey]: Number(d[xKey] || 0),
+        [yKey]: Number(d[yKey] || 0),
+        [zKey]: Number(d[zKey] || 0),
     }));
   }, [data, config.type, config.dimension, config.secondaryDimension, config.metric]);
 
-  // -- Heatmap Data (Pivoted) --
-  // Aggregates data into a matrix form (X-Axis vs Y-Axis) with value Z
+  // -- Heatmap Data --
   const heatmapData = useMemo(() => {
     if (config.type !== VizType.HEATMAP) return [];
     const xKey = config.dimension || 'category';
@@ -91,27 +88,26 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
     return Object.values(agg);
   }, [data, config.type, config.dimension, config.secondaryDimension, config.metric]);
 
-  // -- Treemap Data (Hierarchical) --
-  // Simple grouping by current level for size comparison
+  // -- Treemap Data --
   const treemapData = useMemo(() => {
       if (config.type !== VizType.TREEMAP) return [];
+      const dimKey = config.dimension || currentLevel;
       const valKey = config.metric || 'sales';
       
       const agg: Record<string, number> = {};
       data.forEach(item => {
-          const key = String(item[currentLevel] || 'Unknown');
+          const key = String(item[dimKey] || 'Unknown');
           agg[key] = (agg[key] || 0) + (Number(item[valKey]) || 0);
       });
       return Object.entries(agg).map(([name, size]) => ({ name, size }));
-  }, [data, config.type, currentLevel, config.metric]);
+  }, [data, config.type, currentLevel, config.dimension, config.metric]);
 
-  // Render Logic
   switch (config.type) {
     case VizType.TIME_SERIES:
       return <VizArea 
         data={standardData} 
         onDrill={onDrill} 
-        currentLevel={currentLevel} 
+        currentLevel={config.dimension || currentLevel} 
         drillPath={drillPath} 
         canDrill={canDrill}
         metric={config.metric || 'sales'}
@@ -121,7 +117,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
       return <VizBar 
         data={standardData} 
         onDrill={onDrill} 
-        currentLevel={currentLevel} 
+        currentLevel={config.dimension || currentLevel} 
         drillPath={drillPath} 
         canDrill={canDrill}
         metric={config.metric || 'sales'}
@@ -130,7 +126,6 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
     case VizType.KPI_CARD:
       const metric = config.metric || 'sales';
       const total = standardData.reduce((acc, curr) => acc + (Number(curr[metric]) || 0), 0);
-      // Format large numbers for KPI card
       const formattedTotal = new Intl.NumberFormat('en-US', { 
         notation: "compact", 
         compactDisplay: "short" 
