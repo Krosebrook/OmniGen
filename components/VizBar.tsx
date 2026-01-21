@@ -9,9 +9,10 @@ interface VizBarProps {
   currentLevel: string;
   drillPath: string[];
   canDrill: boolean;
+  metric?: string;
 }
 
-export const VizBar: React.FC<VizBarProps> = ({ data, onDrill, currentLevel, drillPath, canDrill }) => {
+export const VizBar: React.FC<VizBarProps> = ({ data, onDrill, currentLevel, drillPath, canDrill, metric = 'sales' }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
   const handleLegendClick = (o: any) => {
@@ -36,38 +37,39 @@ export const VizBar: React.FC<VizBarProps> = ({ data, onDrill, currentLevel, dri
   const commonAxisProps = {
     axisLine: false,
     tickLine: false,
-    tick: { fontSize: 10, fill: '#64748b', fontWeight: 600 }
+    tick: { fontSize: 10, fill: '#94a3b8', fontWeight: 600 }
   };
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={data} onClick={handleClick} cursor="pointer">
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
         <XAxis dataKey={currentLevel} {...commonAxisProps} />
         <YAxis {...commonAxisProps} />
         <Tooltip 
           content={<VizTooltip currentLevel={currentLevel} drillPath={drillPath} canDrill={canDrill} />}
-          cursor={{ fill: '#6366f1', opacity: 0.1 }}
+          cursor={{ fill: '#a855f7', opacity: 0.1 }}
           allowEscapeViewBox={{ x: true, y: true }}
           wrapperStyle={{ zIndex: 50, outline: 'none' }}
         />
         <Legend 
           onClick={handleLegendClick}
-          wrapperStyle={{ paddingTop: '10px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'pointer' }}
+          wrapperStyle={{ paddingTop: '10px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'pointer', color: '#cbd5e1' }}
         />
-        {!hiddenSeries.has('sales') && (
-          <Bar name="sales" dataKey="sales" fill="#6366f1" radius={[6, 6, 0, 0]}>
+        {!hiddenSeries.has(metric) && (
+          <Bar name={metric} dataKey={metric} radius={[6, 6, 0, 0]}>
             {data.map((_, index) => (
-              <Cell key={`cell-sales-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#4f46e5'} className="hover:opacity-80 transition-opacity" />
+              <Cell key={`cell-${metric}-${index}`} fill={index % 2 === 0 ? '#a855f7' : '#8b5cf6'} className="hover:opacity-80 transition-opacity filter drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]" />
             ))}
           </Bar>
         )}
-        {!hiddenSeries.has('users') && (
-          <Bar name="users" dataKey="users" fill="#818cf8" radius={[6, 6, 0, 0]}>
-            {data.map((_, index) => (
-              <Cell key={`cell-users-${index}`} fill={index % 2 === 0 ? '#818cf8' : '#6366f1'} className="hover:opacity-80 transition-opacity" />
-            ))}
-          </Bar>
+        {/* Fallback/Secondary bar if metrics are strictly sales/users and not dynamic - optional, but good for templates */}
+        {metric === 'sales' && !hiddenSeries.has('users') && (
+           <Bar name="users" dataKey="users" radius={[6, 6, 0, 0]}>
+             {data.map((_, index) => (
+               <Cell key={`cell-users-${index}`} fill={index % 2 === 0 ? '#ec4899' : '#db2777'} className="hover:opacity-80 transition-opacity filter drop-shadow-[0_0_8px_rgba(236,72,153,0.4)]" />
+             ))}
+           </Bar>
         )}
       </BarChart>
     </ResponsiveContainer>

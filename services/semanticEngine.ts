@@ -1,6 +1,13 @@
 
 import { SemanticModel } from '../types';
 
+/**
+ * Infers a semantic model from raw dataset.
+ * This simulates an advanced NLP/ML process that would typically happen on the backend.
+ * 
+ * @param data - The raw array of data objects.
+ * @returns A structured SemanticModel containing entities, metrics, and relationships.
+ */
 export const inferSemanticModel = (data: any[]): SemanticModel => {
   // In a real app, this would perform complex inference
   return {

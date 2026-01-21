@@ -7,11 +7,32 @@
     <title>OmniGen | AI Dashboard Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #f8fafc;
+        background-color: #020617; /* Slate 950 */
+        color: #f8fafc;
       }
+      
+      /* Cyberpunk Background */
+      .bg-cyber {
+        background-color: #020617;
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+          radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+          linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      }
+
+      .glass-panel {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+      }
+
       .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
       }
@@ -19,11 +40,11 @@
         background: transparent;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
+        background: #334155;
         border-radius: 10px;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+        background: #475569;
       }
     </style>
 <script type="importmap">
@@ -31,14 +52,16 @@
   "imports": {
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "recharts": "https://esm.sh/recharts@^2.12.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai"
+    "@google/genai": "https://esm.sh/@google/genai",
+    "html2canvas": "https://esm.sh/html2canvas@1.4.1",
+    "jspdf": "https://esm.sh/jspdf@2.5.1"
   }
 }
 </script>
 </head>
-<body class="overflow-hidden">
+<body class="overflow-hidden bg-cyber">
     <div id="root"></div>
 </body>
 </html>

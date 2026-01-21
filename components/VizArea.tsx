@@ -9,9 +9,10 @@ interface VizAreaProps {
   currentLevel: string;
   drillPath: string[];
   canDrill: boolean;
+  metric?: string;
 }
 
-export const VizArea: React.FC<VizAreaProps> = ({ data, onDrill, currentLevel, drillPath, canDrill }) => {
+export const VizArea: React.FC<VizAreaProps> = ({ data, onDrill, currentLevel, drillPath, canDrill, metric = 'sales' }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
   const handleLegendClick = (o: any) => {
@@ -36,40 +37,41 @@ export const VizArea: React.FC<VizAreaProps> = ({ data, onDrill, currentLevel, d
   const commonAxisProps = {
     axisLine: false,
     tickLine: false,
-    tick: { fontSize: 10, fill: '#64748b', fontWeight: 600 }
+    tick: { fontSize: 10, fill: '#94a3b8', fontWeight: 600 }
   };
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart data={data} onClick={handleClick} cursor="pointer">
         <defs>
-          <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+          <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4}/>
+            <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
           </linearGradient>
           <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#818cf8" stopOpacity={0.2}/>
-            <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
+            <stop offset="5%" stopColor="#ec4899" stopOpacity={0.4}/>
+            <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
         <XAxis dataKey={currentLevel} {...commonAxisProps} />
         <YAxis {...commonAxisProps} />
         <Tooltip 
           content={<VizTooltip currentLevel={currentLevel} drillPath={drillPath} canDrill={canDrill} />}
-          cursor={{ fill: '#6366f1', opacity: 0.1 }}
+          cursor={{ fill: '#a855f7', opacity: 0.1 }}
           allowEscapeViewBox={{ x: true, y: true }}
           wrapperStyle={{ zIndex: 50, outline: 'none' }}
         />
         <Legend 
           onClick={handleLegendClick}
-          wrapperStyle={{ paddingTop: '10px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'pointer' }}
+          wrapperStyle={{ paddingTop: '10px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', cursor: 'pointer', color: '#cbd5e1' }}
         />
-        {!hiddenSeries.has('sales') && (
-          <Area type="monotone" name="sales" dataKey="sales" stroke="#6366f1" fillOpacity={1} fill="url(#colorSales)" strokeWidth={3} />
+        {!hiddenSeries.has(metric) && (
+          <Area type="monotone" name={metric} dataKey={metric} stroke="#a855f7" fillOpacity={1} fill="url(#colorMetric)" strokeWidth={3} className="filter drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]" />
         )}
-        {!hiddenSeries.has('users') && (
-          <Area type="monotone" name="users" dataKey="users" stroke="#818cf8" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={3} />
+        {/* Support legacy 'users' series if default sales is used */}
+        {metric === 'sales' && !hiddenSeries.has('users') && (
+          <Area type="monotone" name="users" dataKey="users" stroke="#ec4899" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={3} className="filter drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]" />
         )}
       </AreaChart>
     </ResponsiveContainer>
