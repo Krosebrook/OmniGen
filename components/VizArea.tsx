@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 import { VizTooltip } from './VizTooltip';
 
 interface VizAreaProps {
@@ -10,9 +10,10 @@ interface VizAreaProps {
   drillPath: string[];
   canDrill: boolean;
   metric?: string;
+  referenceValue?: number;
 }
 
-export const VizArea: React.FC<VizAreaProps> = ({ data, onDrill, currentLevel, drillPath, canDrill, metric = 'sales' }) => {
+export const VizArea: React.FC<VizAreaProps> = ({ data, onDrill, currentLevel, drillPath, canDrill, metric = 'sales', referenceValue }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
   const handleLegendClick = (o: any) => {
@@ -72,6 +73,15 @@ export const VizArea: React.FC<VizAreaProps> = ({ data, onDrill, currentLevel, d
         {/* Support legacy 'users' series if default sales is used */}
         {metric === 'sales' && !hiddenSeries.has('users') && (
           <Area type="monotone" name="users" dataKey="users" stroke="#ec4899" fillOpacity={1} fill="url(#colorUsers)" strokeWidth={3} className="filter drop-shadow-[0_0_6px_rgba(236,72,153,0.5)]" />
+        )}
+        
+        {referenceValue !== undefined && (
+          <ReferenceLine 
+            y={referenceValue} 
+            stroke="#10b981" 
+            strokeDasharray="3 3" 
+            label={{ value: 'Target', position: 'insideTopRight', fill: '#10b981', fontSize: 10, fontWeight: 'bold' }} 
+          />
         )}
       </AreaChart>
     </ResponsiveContainer>

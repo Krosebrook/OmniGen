@@ -42,19 +42,37 @@ export const Icons = {
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
     </svg>
+  ),
+  Lock: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+    </svg>
+  ),
+  Unlock: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+    </svg>
+  ),
+  Pin: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+    </svg>
   )
 };
 
 export const DEMO_DATA = [
-  { date: '2024-01-01', region: 'North', sales: 4500, users: 120, conversion: 0.05, category: 'Tech' },
-  { date: '2024-02-01', region: 'North', sales: 5200, users: 150, conversion: 0.06, category: 'Tech' },
-  { date: '2024-03-01', region: 'North', sales: 4800, users: 140, conversion: 0.045, category: 'Apparel' },
-  { date: '2024-04-01', region: 'South', sales: 3000, users: 90, conversion: 0.03, category: 'Apparel' },
-  { date: '2024-05-01', region: 'South', sales: 3200, users: 100, conversion: 0.035, category: 'Tech' },
-  { date: '2024-06-01', region: 'West', sales: 6000, users: 200, conversion: 0.07, category: 'Service' },
-  { date: '2024-07-01', region: 'West', sales: 6500, users: 220, conversion: 0.08, category: 'Service' },
+  { date: '2024-01-01', activity: 'Running', steps: 8542, calories: 450, sleep_hours: 7.2, mood: 8, location: 'Park' },
+  { date: '2024-01-02', activity: 'Running', steps: 9230, calories: 510, sleep_hours: 6.8, mood: 7, location: 'Street' },
+  { date: '2024-01-03', activity: 'Cycling', steps: 3012, calories: 600, sleep_hours: 7.5, mood: 9, location: 'Gym' },
+  { date: '2024-01-04', activity: 'Walking', steps: 5120, calories: 200, sleep_hours: 8.0, mood: 8, location: 'Office' },
+  { date: '2024-01-05', activity: 'Running', steps: 11050, calories: 550, sleep_hours: 6.5, mood: 6, location: 'Park' },
+  { date: '2024-01-06', activity: 'Rest', steps: 2400, calories: 1500, sleep_hours: 9.0, mood: 9, location: 'Home' },
+  { date: '2024-01-07', activity: 'Hiking', steps: 15600, calories: 800, sleep_hours: 7.0, mood: 10, location: 'Mountain' },
+  { date: '2024-01-08', activity: 'Walking', steps: 6700, calories: 300, sleep_hours: 7.1, mood: 7, location: 'Office' },
+  { date: '2024-01-09', activity: 'Cycling', steps: 3200, calories: 580, sleep_hours: 6.9, mood: 8, location: 'Gym' },
+  { date: '2024-01-10', activity: 'Running', steps: 8900, calories: 480, sleep_hours: 7.4, mood: 7, location: 'Park' },
 ];
 
 export const CATEGORIES = [
-  'Executive KPIs', 'Sales', 'Marketing', 'Product', 'Support', 'Finance', 'HR', 'Ops', 'Security', 'Engineering', 'Supply Chain', 'Legal', 'PR', 'Ecom', 'SaaS', 'Healthcare', 'Education'
+  'Health', 'Finance', 'Gaming', 'Climate', 'Science', 'Social', 'Music', 'Travel', 'Education'
 ];

@@ -8,6 +8,8 @@ import { VizKPI } from './VizKPI';
 import { VizScatter } from './VizScatter';
 import { VizHeatmap } from './VizHeatmap';
 import { VizTreemap } from './VizTreemap';
+import { VizTable } from './VizTable';
+import { HeroVideo } from './HeroVideo';
 
 interface ChartRendererProps {
   config: WidgetConfig;
@@ -26,7 +28,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
   
   // -- Standard Aggregation (Bar, Line, KPI) --
   const standardData = useMemo(() => {
-    if ([VizType.SCATTER, VizType.HEATMAP, VizType.TREEMAP].includes(config.type)) return [];
+    if ([VizType.SCATTER, VizType.HEATMAP, VizType.TREEMAP, VizType.TABLE, VizType.VIDEO].includes(config.type)) return [];
     
     const metric = config.metric || 'sales';
     const dim = config.dimension || currentLevel;
@@ -111,6 +113,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
         drillPath={drillPath} 
         canDrill={canDrill}
         metric={config.metric || 'sales'}
+        referenceValue={config.referenceValue}
       />;
     
     case VizType.BAR:
@@ -121,6 +124,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
         drillPath={drillPath} 
         canDrill={canDrill}
         metric={config.metric || 'sales'}
+        referenceValue={config.referenceValue}
       />;
     
     case VizType.KPI_CARD:
@@ -131,7 +135,15 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
         compactDisplay: "short" 
       }).format(total);
       
-      return <VizKPI title={config.title} value={formattedTotal} trend="--" isPositive={true} />;
+      return <VizKPI 
+        title={config.title} 
+        value={formattedTotal} 
+        trend="--" 
+        isPositive={true} 
+        rawValue={total}
+        referenceValue={config.referenceValue}
+        referenceType={config.referenceType}
+      />;
     
     case VizType.SCATTER:
         return <VizScatter 
@@ -152,9 +164,21 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({ config, data, onDr
     case VizType.TREEMAP:
         return <VizTreemap data={treemapData} />;
 
+    case VizType.TABLE:
+        // Pass raw filtered data directly to table
+        return <VizTable data={data} />;
+    
+    case VizType.VIDEO:
+      return <HeroVideo 
+        src={config.videoUrl} 
+        poster={config.poster}
+        aspectRatio={config.aspectRatio}
+        autoPlay={config.autoPlay}
+      />;
+
     default:
       return (
-        <div className="flex flex-col items-center justify-center h-full text-slate-600 gap-2">
+        <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-2">
           <Icons.Dashboard />
           <span className="text-xs font-semibold uppercase tracking-widest">{config.type} Placeholder</span>
         </div>

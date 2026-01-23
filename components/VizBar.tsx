@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, ReferenceLine } from 'recharts';
 import { VizTooltip } from './VizTooltip';
 
 interface VizBarProps {
@@ -10,9 +10,10 @@ interface VizBarProps {
   drillPath: string[];
   canDrill: boolean;
   metric?: string;
+  referenceValue?: number;
 }
 
-export const VizBar: React.FC<VizBarProps> = ({ data, onDrill, currentLevel, drillPath, canDrill, metric = 'sales' }) => {
+export const VizBar: React.FC<VizBarProps> = ({ data, onDrill, currentLevel, drillPath, canDrill, metric = 'sales', referenceValue }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
   const handleLegendClick = (o: any) => {
@@ -63,13 +64,22 @@ export const VizBar: React.FC<VizBarProps> = ({ data, onDrill, currentLevel, dri
             ))}
           </Bar>
         )}
-        {/* Fallback/Secondary bar if metrics are strictly sales/users and not dynamic - optional, but good for templates */}
+        {/* Fallback/Secondary bar if metrics are strictly sales/users and not dynamic */}
         {metric === 'sales' && !hiddenSeries.has('users') && (
            <Bar name="users" dataKey="users" radius={[6, 6, 0, 0]}>
              {data.map((_, index) => (
                <Cell key={`cell-users-${index}`} fill={index % 2 === 0 ? '#ec4899' : '#db2777'} className="hover:opacity-80 transition-opacity filter drop-shadow-[0_0_8px_rgba(236,72,153,0.4)]" />
              ))}
            </Bar>
+        )}
+        
+        {referenceValue !== undefined && (
+          <ReferenceLine 
+            y={referenceValue} 
+            stroke="#10b981" 
+            strokeDasharray="3 3" 
+            label={{ value: 'Target', position: 'insideTopRight', fill: '#10b981', fontSize: 10, fontWeight: 'bold' }} 
+          />
         )}
       </BarChart>
     </ResponsiveContainer>

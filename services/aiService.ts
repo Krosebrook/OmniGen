@@ -45,7 +45,7 @@ const heuristicParse = (prompt: string): WidgetConfig => {
       h = 3;
   }
 
-  const title = prompt.length > 5 ? prompt.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'AI Insight';
+  const title = prompt.length > 5 ? prompt.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Insight Generated';
 
   return {
     id,
@@ -58,21 +58,13 @@ const heuristicParse = (prompt: string): WidgetConfig => {
   };
 };
 
-/**
- * Smartly samples and aggregates data for AI analysis to avoid token limit exhaustion.
- * @param data - Raw dataset
- * @returns Aggregated subset of data
- */
 const smartSampleData = (data: any[]): any[] => {
   if (data.length <= 50) return data;
-
-  // Identify schema
   const sample = data[0];
   const numericKeys = Object.keys(sample).filter(k => typeof sample[k] === 'number');
   const stringKeys = Object.keys(sample).filter(k => typeof sample[k] === 'string');
   const groupKey = stringKeys.find(k => k.toLowerCase().includes('date') || k.toLowerCase().includes('category') || k.toLowerCase().includes('region')) || stringKeys[0] || 'id';
 
-  // Aggregate
   const grouped: Record<string, any> = {};
   data.forEach(row => {
     const key = row[groupKey];
@@ -84,26 +76,17 @@ const smartSampleData = (data: any[]): any[] => {
   });
 
   let result = Object.values(grouped);
-  
-  // If still too large, sort by significant metric and take top 30
   if (result.length > 30 && numericKeys.length > 0) {
-      // Pick first metric to sort by
       const sortKey = numericKeys[0];
       result.sort((a, b) => b[sortKey] - a[sortKey]);
       result = result.slice(0, 30);
   }
-
   return result.slice(0, 30);
 };
 
-/**
- * Translates a natural language query into a Widget Configuration.
- * Uses Gemini Flash for low-latency instruction following.
- */
 export const parsePrompt = async (prompt: string, semanticModel?: SemanticModel): Promise<WidgetConfig> => {
-  // 1. Check for API Key availability
   if (!process.env.API_KEY) {
-    console.warn("[OmniGen] No API_KEY found. Using heuristic fallback.");
+    console.warn("[FlashFusion] No API_KEY found. Using heuristic fallback.");
     return new Promise((resolve) => {
       setTimeout(() => resolve(heuristicParse(prompt)), 800);
     });
@@ -118,23 +101,20 @@ export const parsePrompt = async (prompt: string, semanticModel?: SemanticModel)
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `
-        You are an expert data visualization architect.
-        User Request: "${prompt}"
+        You are a friendly, expert data visualization guide for FlashFusion.
+        The user wants to see: "${prompt}"
         
-        Available Data Fields:
+        Available Data:
         - Metrics: ${availableMetrics}
         - Dimensions: ${availableDimensions}
         
-        Task: Generate a JSON configuration for a dashboard widget that best visualizes this request.
+        Task: Create a JSON widget config that tells the best story for this data.
         
         Rules:
-        - Select the most appropriate 'type' from: ${Object.values(VizType).join(', ')}.
-        - Use 'scatter' for correlations, 'heatmap' for density/matrix, 'treemap' for hierarchical composition.
-        - 'w' (width) should be between 3 and 12. 
-        - 'h' (height) should be between 1 and 4.
-        - KPI cards should be small (3x1). Complex charts should be larger (6x3 or 6x4).
-        - 'id' should be unique (use a random string suffix).
-        - 'x' and 'y' should be 0 (the grid layout handles placement).
+        - Choose the best 'type' from: ${Object.values(VizType).join(', ')}.
+        - Create a friendly, descriptive 'title'.
+        - Set 'w' (width 3-12) and 'h' (height 1-4) based on complexity.
+        - Set 'x' and 'y' to 0.
       `,
       config: {
         responseMimeType: "application/json",
@@ -142,10 +122,7 @@ export const parsePrompt = async (prompt: string, semanticModel?: SemanticModel)
           type: Type.OBJECT,
           properties: {
             id: { type: Type.STRING },
-            type: { 
-              type: Type.STRING, 
-              enum: Object.values(VizType) 
-            },
+            type: { type: Type.STRING, enum: Object.values(VizType) },
             title: { type: Type.STRING },
             w: { type: Type.INTEGER },
             h: { type: Type.INTEGER },
@@ -163,58 +140,47 @@ export const parsePrompt = async (prompt: string, semanticModel?: SemanticModel)
       config.id = config.id || `gen-${Date.now()}`;
       return config;
     }
-    
     throw new Error("Empty response from AI");
 
   } catch (error) {
-    console.error("[OmniGen] AI Generation failed, falling back to heuristics:", error);
+    console.error("[FlashFusion] AI Generation failed, falling back to heuristics:", error);
     return heuristicParse(prompt);
   }
 };
 
-/**
- * Generates an executive analysis of a specific widget's data.
- * Uses Gemini Flash for analysis and Search Grounding for market context.
- */
 export const generateAnalysis = async (title: string, data: any[]): Promise<AnalysisResult> => {
-  // Fallback for demo/offline
   if (!process.env.API_KEY) {
     return new Promise((resolve) => {
       setTimeout(() => resolve({
-        summary: `Analysis of ${title} indicates a stable trend with minor fluctuations. The data suggests consistent performance across the selected timeframe.`,
-        drivers: ["Consistent user engagement", "Seasonal baseline effects"],
-        recommendations: ["Monitor for upcoming seasonal spikes", "Investigate lower performing segments"],
+        summary: `Hey there! Looking at "${title}", I can see things are running pretty steadily. There's a solid baseline performance here with just the usual fluctuations you'd expect.`,
+        drivers: ["Consistent engagement from your core users", "Seasonal patterns holding steady"],
+        recommendations: ["Keep an eye on that upcoming seasonal spike", "Maybe dig a bit deeper into those lower-performing segments?"],
         sentiment: "neutral",
-        marketContext: "Similar industries typically see a 5-10% variance in this period due to macroeconomic factors.",
-        sources: [
-            { title: "Global Industry Report 2024", uri: "#" },
-            { title: "Market Trends Daily", uri: "#" }
-        ]
+        marketContext: "Similar businesses typically see a 5-10% variance right now.",
+        sources: [{ title: "Industry Pulse 2024", uri: "#" }]
       }), 1500);
     });
   }
 
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
-    // Aggregation Logic for large datasets
     const aggregatedData = smartSampleData(data);
     const dataSample = JSON.stringify(aggregatedData);
 
-    // Parallel execution: Internal Analysis (JSON) + External Context (Search)
     const [internalResponse, externalResponse] = await Promise.all([
         ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: `
-              Role: Senior Business Analyst.
-              Task: Analyze the following dataset for a chart titled "${title}".
-              Data (Aggregated Sample): ${dataSample}
+              Role: You are FlashFusion's friendly, conversational data analyst.
+              Tone: Professional but approachable, like a helpful colleague. Avoid robotic jargon.
+              Task: Analyze this data for "${title}".
+              Data: ${dataSample}
               
               Provide:
-              1. An executive summary (max 2 sentences).
-              2. Key drivers/factors (max 3 bullet points).
-              3. Strategic recommendations (max 2).
-              4. Overall sentiment.
+              1. A friendly summary (max 2 sentences).
+              2. Key drivers (bullet points).
+              3. Helpful recommendations.
+              4. Sentiment.
             `,
             config: {
               responseMimeType: "application/json",
@@ -231,7 +197,7 @@ export const generateAnalysis = async (title: string, data: any[]): Promise<Anal
         }),
         ai.models.generateContent({
             model: 'gemini-3-flash-preview',
-            contents: `Briefly summarize the latest market trends, industry benchmarks, or news related to the business topic: "${title}". Focus on high-level business implications. Keep it under 50 words.`,
+            contents: `Find one recent, interesting fact or benchmark about: "${title}". Keep it friendly and short (under 40 words).`,
             config: {
                 tools: [{googleSearch: {}}]
             }
@@ -240,12 +206,10 @@ export const generateAnalysis = async (title: string, data: any[]): Promise<Anal
 
     const result = JSON.parse(internalResponse.text!) as AnalysisResult;
 
-    // Attach External Context
     if (externalResponse.text) {
         result.marketContext = externalResponse.text;
     }
 
-    // Attach Grounding Sources
     const chunks = externalResponse.candidates?.[0]?.groundingMetadata?.groundingChunks;
     if (chunks) {
         result.sources = chunks
@@ -258,7 +222,7 @@ export const generateAnalysis = async (title: string, data: any[]): Promise<Anal
   } catch (error) {
     console.error("Analysis failed", error);
     return {
-       summary: "Could not generate analysis at this time.",
+       summary: "Oops! I couldn't quite analyze that data right now.",
        drivers: [],
        recommendations: [],
        sentiment: "neutral"

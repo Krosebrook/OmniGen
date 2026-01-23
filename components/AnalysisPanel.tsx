@@ -19,7 +19,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ isOpen, onClose, w
       {/* Header */}
       <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
         <div className="flex items-center gap-2">
-          <div className="text-fuchsia-400"><Icons.Sparkles /></div>
+          <div className="text-cyan-400"><Icons.Sparkles /></div>
           <h3 className="font-black text-white uppercase tracking-tight">Omni-Analyst</h3>
         </div>
         <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -41,8 +41,8 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ isOpen, onClose, w
         ) : analysis ? (
           <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
             
-            <div className="bg-fuchsia-500/10 p-4 rounded-2xl border border-fuchsia-500/30">
-              <span className="text-[10px] font-black text-fuchsia-400 uppercase tracking-widest block mb-2">Context</span>
+            <div className="bg-cyan-500/10 p-4 rounded-2xl border border-cyan-500/30">
+              <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest block mb-2">Context</span>
               <h4 className="font-bold text-white text-lg leading-tight">{widget?.title}</h4>
             </div>
 
@@ -57,7 +57,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ isOpen, onClose, w
             </section>
 
             {analysis.marketContext && (
-              <section className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 p-4 rounded-2xl border border-indigo-500/20">
+              <section className="bg-gradient-to-br from-indigo-900/20 to-blue-900/20 p-4 rounded-2xl border border-indigo-500/20">
                 <div className="flex items-center gap-2 mb-2">
                    <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -75,7 +75,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ isOpen, onClose, w
               <ul className="space-y-3">
                 {analysis.drivers.map((driver, i) => (
                   <li key={i} className="flex gap-3 text-sm text-slate-300">
-                    <span className="text-fuchsia-500 font-bold">•</span>
+                    <span className="text-cyan-500 font-bold">•</span>
                     {driver}
                   </li>
                 ))}
@@ -110,7 +110,7 @@ export const AnalysisPanel: React.FC<AnalysisPanelProps> = ({ isOpen, onClose, w
                       rel="noopener noreferrer"
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors group"
                     >
-                      <svg className="w-3 h-3 text-slate-500 group-hover:text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-3 h-3 text-slate-500 group-hover:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                       <span className="text-[10px] font-bold text-slate-400 group-hover:text-white truncate max-w-[150px]">{source.title}</span>

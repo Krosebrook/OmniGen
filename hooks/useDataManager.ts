@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { DEMO_DATA } from '../constants';
 
@@ -10,11 +11,18 @@ export const useDataManager = (currentTemplateName: string) => {
     let interval: any;
     if (isStreaming) {
       interval = setInterval(() => {
-        setData(prev => prev.map(item => ({
-          ...item,
-          sales: Math.max(0, item.sales + (Math.random() - 0.5) * 500),
-          users: Math.max(0, item.users + Math.floor((Math.random() - 0.5) * 10))
-        })));
+        setData(prev => prev.map(item => {
+            // Generic numeric jiggle for any number field
+            const newItem = { ...item };
+            Object.keys(newItem).forEach(key => {
+                if (typeof newItem[key] === 'number' && key !== 'id') {
+                    // Fluctuate by +/- 5%
+                    const fluctuation = newItem[key] * 0.05 * (Math.random() - 0.5);
+                    newItem[key] = Math.max(0, newItem[key] + fluctuation);
+                }
+            });
+            return newItem;
+        }));
       }, 2000);
     }
     return () => clearInterval(interval);

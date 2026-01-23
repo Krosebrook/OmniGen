@@ -21,7 +21,7 @@ export const VizTooltip: React.FC<CustomTooltipProps> = ({ active, payload, labe
               {currentLevel}
             </span>
              {canDrill && (
-                <span className="flex items-center gap-1 text-[9px] font-black text-fuchsia-400 uppercase tracking-wider bg-fuchsia-500/10 px-2 py-0.5 rounded-full border border-fuchsia-500/20">
+                <span className="flex items-center gap-1 text-[9px] font-black text-cyan-400 uppercase tracking-wider bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
                   Drill Down →
                 </span>
              )}
@@ -78,12 +78,12 @@ export const VizTooltip: React.FC<CustomTooltipProps> = ({ active, payload, labe
         {/* Filters Context */}
         {drillPath.length > 0 && (
           <div className="mt-4 pt-3 border-t border-white/10">
-            <span className="text-[9px] font-bold text-fuchsia-400 uppercase tracking-widest mb-2 block">
+            <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest mb-2 block">
               Applied Filters
             </span>
             <div className="flex flex-wrap gap-1.5">
               {drillPath.map((filter, i) => (
-                <span key={i} className="px-2 py-1 bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20 rounded-lg text-[9px] font-bold shadow-sm">
+                <span key={i} className="px-2 py-1 bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 rounded-lg text-[9px] font-bold shadow-sm">
                   {filter}
                 </span>
               ))}

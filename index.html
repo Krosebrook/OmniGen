@@ -4,47 +4,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniGen | AI Dashboard Generator</title>
+    <title>FlashFusion | Intelligent BI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
       body {
         font-family: 'Inter', sans-serif;
         background-color: #020617; /* Slate 950 */
-        color: #f8fafc;
+        color: #e2e8f0; /* Slate 200 - High Contrast */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       
-      /* Cyberpunk Background */
+      /* Refined Void Background - Higher Visibility Blue/Cyan tint */
       .bg-cyber {
         background-color: #020617;
         background-image: 
-          radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
-          radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
-          linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px),
-          linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px);
-        background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+          radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.08) 0%, transparent 50%), /* Cyan top left */
+          radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%), /* Indigo top right */
+          radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.08) 0%, transparent 50%), /* Purple bottom right */
+          radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 50%); /* Blue bottom left */
+        background-size: 100% 100%;
+        background-attachment: fixed;
       }
 
+      /* Cleaner Glass Panel - Higher Contrast Border */
       .glass-panel {
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(15, 23, 42, 0.75); /* Darker opacity for better text contrast */
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
       }
 
       .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
+        width: 8px; /* Slightly wider for access */
+        height: 8px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
+        background: #0f172a;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #334155;
+        background: #475569;
         border-radius: 10px;
+        border: 2px solid #0f172a; /* Creates padding effect */
       }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #475569;
+        background: #64748b; /* Lighter on hover */
+      }
+      
+      /* Focus visible helper for accessibility */
+      :focus-visible {
+        outline: 2px solid #22d3ee; /* Cyan-400 */
+        outline-offset: 2px;
       }
     </style>
 <script type="importmap">

@@ -15,11 +15,6 @@ export const GRID_SYSTEM = {
   GAP_PX: 24, // tailwind gap-6
 };
 
-export enum EditMode {
-  SAFE = 'SAFE', // Prevents overlapping widgets
-  PRO = 'PRO'    // Allows advanced editing (resizing, moving)
-}
-
 export enum VizType {
   TABLE = 'table',
   PIVOT = 'pivot',
@@ -39,7 +34,8 @@ export enum VizType {
   BOX_PLOT = 'box-plot',
   GAUGE = 'gauge',
   WATERFALL = 'waterfall',
-  KPI_CARD = 'kpi-card'
+  KPI_CARD = 'kpi-card',
+  VIDEO = 'video'
 }
 
 /**
@@ -57,6 +53,12 @@ export interface SemanticModel {
   assumptions: { assumption: string; impact: string; confirm_by: string }[];
 }
 
+export interface Annotation {
+  id: string;
+  text: string;
+  timestamp: number;
+}
+
 /**
  * Configuration for a single dashboard widget.
  * x, y, w, h are in Grid Units (not pixels).
@@ -69,6 +71,20 @@ export interface WidgetConfig {
   dimension?: string;          // The primary grouping key (X-Axis)
   secondaryDimension?: string; // The secondary grouping key (Legend/Y-Axis)
   filter?: Record<string, any>;
+  
+  // Threshold Monitoring
+  referenceValue?: number;     // The target or limit value
+  referenceType?: 'min' | 'max'; // 'min' = Goal (Must exceed), 'max' = Limit (Must stay under)
+
+  // Video Specific
+  videoUrl?: string;
+  poster?: string;
+  aspectRatio?: string; // e.g., "16/9", "4/3", "21/9"
+  autoPlay?: boolean;
+
+  // Observations
+  annotations?: Annotation[];
+
   w: number; // Width in grid columns (1-12)
   h: number; // Height in grid rows
   x: number; // Column start (0-11)
@@ -79,10 +95,9 @@ export interface DashboardTemplate {
   id: string;
   name: string;
   category: string;
-  archetype: 'Executive' | 'Ops' | 'Analyst';
   description: string;
   widgets: WidgetConfig[];
-  difficulty: 'Novice' | 'Intermediate' | 'Pro';
+  difficulty: 'Basic' | 'Advanced';
 }
 
 export interface AnalysisResult {
